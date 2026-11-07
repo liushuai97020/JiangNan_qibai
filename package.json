@@ -1,0 +1,14 @@
+{
+  "name": "yingluo-qibai",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "樱落·栖白 — 可交互的江南两层小别墅 3D 网页",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node server.mjs",
+    "check": "node --check server.mjs && node --check src/main.js && node --check src/state.js && node --check src/scene/renderer.js && node --check src/scene/helpers.js && node --check src/scene/materials.js && node --check src/scene/sky.js && node --check src/scene/lighting.js && node --check src/scene/villa.js && node --check src/scene/interior.js && node --check src/scene/courtyard.js && node --check src/scene/cherry.js && node --check src/scene/car.js && node --check src/ui/controls.js && node --check src/ui/hotspots.js && node --check src/ui/panels.js && node --check tools/verify.mjs",
+    "verify": "node tools/verify.mjs"
+  }
+}
+

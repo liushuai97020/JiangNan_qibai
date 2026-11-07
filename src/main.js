@@ -32,6 +32,7 @@ const MOBILE_VIEWS = {
   living: { position: [12, 3.8, 14], target: [-1.2, 1.65, -4.1], fov: 50 },
   bedroom: { position: [-1.2, 12.2, 10.5], target: [-2.6, 4.8, -6.2], fov: 48 },
   parking: { position: [1.0, 3.5, 15.5], target: [9.68, 1.0, 7.1], fov: 46 },
+  driveway: { position: [-4.0, 13.2, -0.8], target: [10.2, 1.1, 14.8], fov: 60 },
   tea: { position: [-3.0, 3.5, 10.5], target: [-8.7, 1.35, -3.7], fov: 48 },
   aerial: { position: [25, 24, 31], target: [0, 0.6, 0], fov: 50 }
 };
@@ -269,6 +270,37 @@ function boot() {
     panels.showToast(state.autoOrbit ? '自动环游已开启，拖动即可暂停' : '自动环游已暂停');
   }
 
+  let carState = 'parked';
+
+  function setCarUI(status) {
+    if (status === 'parked') {
+      controlsUI.setCarUI({ label: '车辆驶出', sub: 'CAR · PARKED', mode: 'parked' });
+    } else if (status === 'outside') {
+      controlsUI.setCarUI({ label: '泊回院子', sub: 'CAR · OUTSIDE', mode: 'outside' });
+    } else if (status === 'drivingOut') {
+      controlsUI.setCarUI({ label: '驶出中…', sub: 'CAR · MOVING', mode: 'driving', disabled: true });
+    } else if (status === 'drivingIn') {
+      controlsUI.setCarUI({ label: '泊车中…', sub: 'CAR · MOVING', mode: 'driving', disabled: true });
+    }
+    carState = status;
+  }
+
+  function handleCarToggle() {
+    if (carState === 'parked') {
+      if (state.view !== 'driveway') setView('driveway', { closePanel: true });
+      if (car.driveOut()) {
+        setCarUI('drivingOut');
+        panels.showToast('车辆正在驶出院子');
+      }
+    } else if (carState === 'outside') {
+      if (state.view !== 'driveway') setView('driveway', { closePanel: true });
+      if (car.driveIn()) {
+        setCarUI('drivingIn');
+        panels.showToast('车辆正在泊回院子');
+      }
+    }
+  }
+
   function handleSelectRoom(roomId) {
     const room = ROOMS[roomId];
     if (!room) return;
@@ -285,6 +317,7 @@ function boot() {
     onWind: handleWind,
     onCutaway: handleCutaway,
     onOrbit: handleOrbit,
+    onCar: handleCarToggle,
     onAbout: () => panels.openAbout()
   });
   // Keep the local name used below and expose once for clarity.
@@ -293,6 +326,7 @@ function boot() {
     onSelect: handleSelectRoom
   });
   hotspots.setMode(state.cutaway ? 'interior' : 'exterior');
+  setCarUI('parked');
 
   controls.addEventListener('start', () => {
     if (state.autoOrbit) {
@@ -338,6 +372,12 @@ function boot() {
     setPetals: (enabled) => handlePetal(enabled),
     setWind: (value) => handleWind(value),
     setOrbit: (enabled) => handleOrbit(enabled),
+    toggleCar: () => handleCarToggle(),
+    carState: () => ({ phase: carState, ...car.getDriveState() }),
+    setCarProgress: (t) => {
+      const next = car.setDriveProgress(t);
+      setCarUI(next.outside ? 'outside' : 'parked');
+    },
     hide: (name, visible = false) => {
       const object = scene.getObjectByName(name);
       if (object) object.visible = visible;
@@ -366,6 +406,14 @@ function boot() {
     lighting.update(dt);
     sky.update(elapsed);
     cherry.update(dt, elapsed);
+    const carEvent = car.updateDrive(dt, now);
+    if (carEvent === 'outside') {
+      setCarUI('outside');
+      panels.showToast('车辆已驶出院子');
+    } else if (carEvent === 'parked') {
+      setCarUI('parked');
+      panels.showToast('车辆已停回院子');
+    }
     updateTransition(dt);
     controls.update();
 

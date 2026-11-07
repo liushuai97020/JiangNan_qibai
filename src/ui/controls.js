@@ -8,6 +8,7 @@ export function createControls({
   onWind,
   onCutaway,
   onOrbit,
+  onCar,
   onAbout
 }) {
   const viewButtons = Array.from(document.querySelectorAll('[data-view]'));
@@ -20,6 +21,9 @@ export function createControls({
   const windSlider = document.getElementById('windSlider');
   const windValue = document.getElementById('windValue');
   const statusText = document.getElementById('statusText');
+  const carAction = document.getElementById('carAction');
+  const carActionLabel = document.getElementById('carActionLabel');
+  const carActionSub = document.getElementById('carActionSub');
 
   for (const button of viewButtons) {
     button.addEventListener('click', (event) => {
@@ -42,6 +46,7 @@ export function createControls({
   petalToggle.addEventListener('click', () => onPetal(!state.petals));
   cutawayToggle.addEventListener('click', () => onCutaway(!state.cutaway));
   orbitToggle.addEventListener('click', () => onOrbit(!state.autoOrbit));
+  carAction.addEventListener('click', () => onCar());
 
   windSlider.addEventListener('input', () => {
     const value = Number(windSlider.value) / 100;
@@ -100,6 +105,16 @@ export function createControls({
     windSlider.style.setProperty('--wind', `${percent}%`);
   }
 
+  function setCarUI({ label, sub, mode = 'parked', disabled = false }) {
+    carActionLabel.textContent = label;
+    carActionSub.textContent = sub;
+    carAction.disabled = disabled;
+    carAction.setAttribute('aria-label', label);
+    carAction.setAttribute('aria-pressed', String(mode === 'outside'));
+    carAction.classList.toggle('is-driving', mode === 'driving');
+    carAction.classList.toggle('is-out', mode === 'outside');
+  }
+
   function sync(nextState) {
     setActiveView(nextState.view);
     setLightUI(nextState.light);
@@ -120,6 +135,7 @@ export function createControls({
     setPetalsUI,
     setCutawayUI,
     setOrbitUI,
-    setWindUI
+    setWindUI,
+    setCarUI
   };
 }

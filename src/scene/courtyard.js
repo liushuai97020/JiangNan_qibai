@@ -366,7 +366,15 @@ export function createCourtyard(M) {
   group.add(box(27.5, 0.06, 24.4, M.gravel, [0, 0.0, 1.0], { cast: false }));
   group.add(box(13.8, 0.06, 1.7, M.stone, [0, 0.025, -0.05], { cast: false }));
 
-  // Stone terrace at the entrance and a framed planting bed beneath the cherry.
+  // Street outside the front wall and the apron through the vehicle gate.
+  group.add(box(68, 0.035, 7.6, M.asphalt, [0, 0.012, 19.15], { cast: false }));
+  group.add(box(5.2, 0.045, 3.1, M.pavingDark, [9.7, 0.03, 14.75], { cast: false }));
+  group.add(box(68, 0.09, 0.18, M.stone, [0, 0.04, 15.32], { cast: false }));
+  group.add(box(68, 0.09, 0.18, M.stone, [0, 0.04, 22.98], { cast: false }));
+  for (let x = -28; x <= 28; x += 5.2) {
+    group.add(box(2.4, 0.01, 0.09, M.linenLight, [x, 0.045, 19.25], { cast: false }));
+  }
+
   group.add(box(10.8, 0.045, 3.15, M.paving, [0, 0.075, 1.2], { cast: false }));
   group.add(box(10.9, 0.08, 0.16, M.stoneDark, [0, 0.09, 2.78], { cast: false }));
   group.add(box(10.9, 0.08, 0.16, M.stoneDark, [0, 0.09, -0.35], { cast: false }));

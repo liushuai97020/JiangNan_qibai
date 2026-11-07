@@ -347,6 +347,12 @@ export function createMaterials() {
       map: gravel,
       roughness: 1
     }),
+    asphalt: new THREE.MeshStandardMaterial({
+      color: 0x77766f,
+      map: gravel,
+      roughness: 0.96,
+      metalness: 0.02
+    }),
     grass: new THREE.MeshStandardMaterial({
       color: 0x7a8a6d,
       map: grass,

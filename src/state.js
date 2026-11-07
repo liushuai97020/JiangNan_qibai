@@ -44,6 +44,15 @@ export const VIEWS = {
     cutaway: false,
     interior: false
   },
+  driveway: {
+    label: '车道',
+    en: 'GATEWAY',
+    position: [0.2, 11.0, 0.5],
+    target: [9.8, 0.9, 13.8],
+    fov: 45,
+    cutaway: false,
+    interior: false
+  },
   tea: {
     label: '茶室',
     en: 'TEA ROOM',
@@ -177,7 +186,7 @@ export const ROOMS = {
       ['砾石', '#aaa18f'],
       ['黄铜', '#b08a55']
     ],
-    note: '车位前牌照与后牌照均显示 苏EG59122。'
+    note: '点击右下角“车辆驶出”按钮，可让白色轿车驶出院子；再次点击即可泊回车位。'
   },
   living: {
     id: 'living',

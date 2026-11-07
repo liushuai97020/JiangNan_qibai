@@ -1,6 +1,15 @@
 import * as THREE from 'three';
 import { PLATE_TEXT } from './materials.js';
-import { box, plane, roundedBox, cylinder, addContactShadow, mulberry32 } from './helpers.js';
+import { box, plane, roundedBox, cylinder, addContactShadow, mulberry32, easeInOutCubic, clamp } from './helpers.js';
+
+const DRIVE_POINTS = [
+  [9.68, 0, 7.25],
+  [9.68, 0, 9.75],
+  [9.68, 0, 12.25],
+  [9.68, 0, 14.05],
+  [10.35, 0, 15.4],
+  [11.8, 0, 17.25]
+];
 
 function makeWheel(M, x, z) {
   const group = new THREE.Group();
@@ -28,9 +37,6 @@ function makeWheel(M, x, z) {
   ring.castShadow = false;
   group.add(ring);
   for (let index = 0; index < 5; index++) {
-    const spoke = box(0.022, 0.035, 0.37, M.rim, [Math.sign(x) * 0.136, 0, 0], { cast: false });
-    spoke.rotation.x = (index / 5) * Math.PI * 2;
-    spoke.position.x = Math.sign(x) * 0.137;
     const pivot = new THREE.Group();
     pivot.position.set(Math.sign(x) * 0.137, 0, 0);
     pivot.rotation.x = (index / 5) * Math.PI * 2;
@@ -62,6 +68,9 @@ function makeCar(M) {
   const group = new THREE.Group();
   group.name = 'white-car';
   group.position.set(9.68, 0, 7.25);
+  const wheels = [];
+  const frontWheels = [];
+  const rearWheels = [];
 
   // Lower body and shoulder.
   group.add(roundedBox(1.86, 0.34, 4.62, 0.14, M.carPaint, [0, 0.55, 0], { segments: 6 }));
@@ -111,7 +120,11 @@ function makeCar(M) {
   // Wheels and wheel wells.
   for (const x of [-1, 1]) {
     for (const z of [-1.46, 1.47]) {
-      group.add(makeWheel(M, x * 0.9, z));
+      const wheel = makeWheel(M, x * 0.9, z);
+      wheels.push(wheel);
+      if (z > 0) frontWheels.push(wheel);
+      else rearWheels.push(wheel);
+      group.add(wheel);
       const well = cylinder(0.43, 0.43, 0.08, M.charcoal, [x * 0.82, 0.4, z], {
         radialSegments: 22,
         rotation: [0, 0, Math.PI / 2],
@@ -188,9 +201,86 @@ function makeCar(M) {
     }
   });
 
+  const driveCurve = new THREE.CatmullRomCurve3(
+    DRIVE_POINTS.map(([x, y, z]) => new THREE.Vector3(x, y, z)),
+    false,
+    'catmullrom',
+    0.2
+  );
+  const driveLength = driveCurve.getLength();
+  let driveT = 0;
+  let animation = null;
+
+  function applyDrivePosition(t) {
+    const clamped = clamp(t, 0, 1);
+    const point = driveCurve.getPointAt(clamped);
+    const tangent = driveCurve.getTangentAt(clamped);
+    group.position.set(point.x, 0, point.z);
+    group.rotation.y = Math.atan2(tangent.x, tangent.z);
+  }
+
+  function startDrive(out) {
+    if (animation) return false;
+    const target = out ? 1 : 0;
+    if (Math.abs(target - driveT) < 0.0005) return false;
+    animation = {
+      from: driveT,
+      to: target,
+      startedAt: performance.now(),
+      duration: 2.35 + Math.abs(target - driveT) * 0.65
+    };
+    return true;
+  }
+
+  function updateDrive(dt, now = performance.now()) {
+    if (!animation) return null;
+    const previous = driveT;
+    const raw = clamp((now - animation.startedAt) / (animation.duration * 1000), 0, 1);
+    const eased = easeInOutCubic(raw);
+    driveT = animation.from + (animation.to - animation.from) * eased;
+    applyDrivePosition(driveT);
+    const deltaDistance = (driveT - previous) * driveLength;
+    for (const wheel of wheels) {
+      wheel.rotation.x -= deltaDistance / 0.38;
+    }
+    const steering = Math.sin(Math.PI * raw) * 0.13;
+    for (const wheel of frontWheels) wheel.rotation.y = steering;
+    if (raw >= 1) {
+      const result = animation.to === 1 ? 'outside' : 'parked';
+      animation = null;
+      for (const wheel of frontWheels) wheel.rotation.y = 0;
+      applyDrivePosition(driveT);
+      return result;
+    }
+    return 'driving';
+  }
+
+  function getDriveState() {
+    return {
+      progress: driveT,
+      outside: driveT > 0.995,
+      parked: driveT < 0.005,
+      driving: Boolean(animation)
+    };
+  }
+
+  function setDriveProgress(t) {
+    animation = null;
+    driveT = clamp(t, 0, 1);
+    applyDrivePosition(driveT);
+    for (const wheel of frontWheels) wheel.rotation.y = 0;
+    return getDriveState();
+  }
+
   return {
     group,
     plateText: PLATE_TEXT,
+    driveOut: () => startDrive(true),
+    driveIn: () => startDrive(false),
+    updateDrive,
+    getDriveState,
+    setDriveProgress,
+    driveCurve,
     anchors: {
       car: [9.68, 1.2, 7.25],
       plate: [9.68, 0.62, 9.62]

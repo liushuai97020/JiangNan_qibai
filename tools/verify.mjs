@@ -257,6 +257,37 @@ if (ready) {
   console.log('controls state:', JSON.stringify(controlsState));
   await evaluate("window.__VILLA__.setPetals(true); window.__VILLA__.setCutaway(false); window.__VILLA__.setWind(0.55); window.__VILLA__.setView('courtyard', true);");
 
+  const carStart = await evaluate("window.__VILLA__.carState()", false);
+  await evaluate("document.getElementById('carAction').click()");
+  await sleep(500);
+  let carOutside = await evaluate("window.__VILLA__.carState()", false);
+  for (let attempt = 0; attempt < 35 && carOutside.driving; attempt++) {
+    await sleep(200);
+    carOutside = await evaluate("window.__VILLA__.carState()", false);
+  }
+  const carLabelOutside = await evaluate("document.getElementById('carActionLabel').textContent", false);
+  console.log('car start:', JSON.stringify(carStart), 'outside:', JSON.stringify(carOutside), 'label:', carLabelOutside);
+
+  await evaluate("document.getElementById('carAction').click()");
+  await sleep(500);
+  let carParked = await evaluate("window.__VILLA__.carState()", false);
+  for (let attempt = 0; attempt < 35 && carParked.driving; attempt++) {
+    await sleep(200);
+    carParked = await evaluate("window.__VILLA__.carState()", false);
+  }
+  const carLabelParked = await evaluate("document.getElementById('carActionLabel').textContent", false);
+  console.log('car parked:', JSON.stringify(carParked), 'label:', carLabelParked);
+  if (!carOutside.outside || !carParked.parked || !carLabelParked.includes('驶出')) process.exitCode = 1;
+
+  await evaluate("window.__VILLA__.setCarProgress(1)");
+  await sleep(350);
+  await evaluate("document.getElementById('toast').classList.remove('is-visible')");
+  await screenshot('car-outside.png');
+  await evaluate("window.__VILLA__.setCarProgress(0)");
+  await sleep(350);
+  await evaluate("document.getElementById('toast').classList.remove('is-visible')");
+  await screenshot('car-parked.png');
+
   await send('Emulation.setDeviceMetricsOverride', {
     width: 390,
     height: 844,

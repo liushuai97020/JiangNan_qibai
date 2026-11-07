@@ -115,6 +115,18 @@ npm run preview
 
 如果出现 `500 FUNCTION_INVOCATION_FAILED`，说明 Vercel 把项目当成了 Node.js 服务端函数来部署。请将 **Framework Preset** 改为 **Other**，并使用上面的静态构建配置重新部署。项目的本地服务器已移动到 `scripts/` 并在 `.vercelignore` 中排除，不会成为 Vercel Function。
 
+若 Vercel 的构建设置始终无法生效，可使用已提交的纯静态备用方案：
+
+- **Root Directory**：`dist`
+- **Framework Preset**：Other
+- **Build Command**：清空（不要使用 `npm run build`）
+- **Output Directory**：清空或 `./`
+- **Install Command**：清空
+
+`dist/` 是已构建好的纯静态站点，没有 `package.json`、没有本地服务器，也没有任何 Serverless Function。修改后重新部署即可。
+
+> 修改源码后需要先执行 `npm run build`，再把新的 `dist/` 一并提交，备用方案才会更新。
+
 `verify` 需要本机安装 Chrome，路径默认为：
 
 ```text

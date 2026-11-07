@@ -3,7 +3,7 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __dirname = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const port = Number(process.env.PORT || 4173);
 const host = process.env.HOST || '127.0.0.1';
 
@@ -88,3 +88,4 @@ for (const signal of ['SIGINT', 'SIGTERM']) {
     server.close(() => process.exit(0));
   });
 }
+

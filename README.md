@@ -16,7 +16,7 @@ npm start
 http://127.0.0.1:4173
 ```
 
-也可以直接双击 `start.bat`（Windows），或在项目目录执行 `node server.mjs`。
+也可以直接双击 `start.bat`（Windows），或在项目目录执行 `node scripts/dev-server.mjs`。
 
 > 不建议直接双击 `index.html`。ES Modules 需要通过本地 HTTP 服务加载。
 
@@ -54,8 +54,12 @@ http://127.0.0.1:4173/?view=parking&light=dusk&cutaway=0&petals=1&wind=0.55
 ```text
 index.html
 styles.css
-server.mjs
 package.json
+vercel.json
+scripts/
+  dev-server.mjs      本地静态服务器
+  build.mjs           Vercel 静态构建，输出 dist/
+  preview.mjs         本地预览 dist/
 src/
   main.js
   state.js
@@ -97,7 +101,7 @@ npm run verify  # 启动 Chrome 无头渲染并输出截图与交互检查
 - **Output Directory**：`dist`
 - **Install Command**：`npm install`
 
-然后重新部署。`server.mjs` 只用于本地预览，Vercel 不需要它。
+然后重新部署。`scripts/dev-server.mjs` 只用于本地预览，Vercel 不需要它，也不会被部署为函数。
 
 本地验证生产构建：
 
@@ -108,6 +112,8 @@ npm run preview
 ```
 
 如果部署后仍然显示 404，优先检查 Vercel 的 **Root Directory** 是否指向了错误的子目录，以及 **Output Directory** 是否仍保留旧的 `public`/`dist` 设置。
+
+如果出现 `500 FUNCTION_INVOCATION_FAILED`，说明 Vercel 把项目当成了 Node.js 服务端函数来部署。请将 **Framework Preset** 改为 **Other**，并使用上面的静态构建配置重新部署。项目的本地服务器已移动到 `scripts/` 并在 `.vercelignore` 中排除，不会成为 Vercel Function。
 
 `verify` 需要本机安装 Chrome，路径默认为：
 
@@ -130,3 +136,4 @@ C:\Program Files\Google\Chrome\Application\chrome.exe
 Three.js 以 MIT License 使用，许可证文件位于 [vendor/three/LICENSE](./vendor/three/LICENSE)。
 
 本项目中的建筑、景观、汽车、室内与 UI 均为原创程序化实现。
+

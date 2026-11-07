@@ -85,6 +85,30 @@ npm run check   # Node 语法检查
 npm run verify  # 启动 Chrome 无头渲染并输出截图与交互检查
 ```
 
+## 部署到 Vercel
+
+项目已包含 `vercel.json` 和静态构建脚本，Vercel 会执行 `npm run build` 并把 `dist/` 作为输出目录。
+
+在 Vercel 项目中确认以下设置：
+
+- **Root Directory**：仓库根目录（留空或 `.`，不要选 `src`、`artifacts` 或 `scripts`）
+- **Framework Preset**：Other
+- **Build Command**：`npm run build`
+- **Output Directory**：`dist`
+- **Install Command**：`npm install`
+
+然后重新部署。`server.mjs` 只用于本地预览，Vercel 不需要它。
+
+本地验证生产构建：
+
+```bash
+npm run build
+npm run preview
+# http://127.0.0.1:4174
+```
+
+如果部署后仍然显示 404，优先检查 Vercel 的 **Root Directory** 是否指向了错误的子目录，以及 **Output Directory** 是否仍保留旧的 `public`/`dist` 设置。
+
 `verify` 需要本机安装 Chrome，路径默认为：
 
 ```text

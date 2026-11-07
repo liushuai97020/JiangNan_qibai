@@ -159,6 +159,9 @@ await sleep(1200);
 
 const ready = await waitReady();
 await sleep(900);
+const orbitDefault = await evaluate("document.getElementById('orbitToggle').getAttribute('aria-pressed')", false);
+console.log('orbit default:', orbitDefault);
+if (orbitDefault !== 'true') process.exitCode = 1;
 let info = null;
 try {
   info = await evaluate('window.__VILLA__ ? window.__VILLA__.info() : null', false);
@@ -182,6 +185,12 @@ if (process.env.DEBUG_HIDE === '1') {
     await sleep(350);
     await screenshot(`debug-no-${name}.png`);
   }
+}
+
+if (process.env.DEBUG_GABLE === '1') {
+  await evaluate("window.__VILLA__.hide('gable-left', false)");
+  await sleep(500);
+  await screenshot('debug-no-left-gable.png');
 }
 
 if (process.env.DEBUG_DUMP === '1') {

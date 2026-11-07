@@ -265,7 +265,7 @@ function boot() {
   function handleOrbit(enabled) {
     state.autoOrbit = Boolean(enabled);
     controls.autoRotate = state.autoOrbit;
-    controls.autoRotateSpeed = 0.34;
+    controls.autoRotateSpeed = 0.55;
     controlsUI.setOrbitUI(state.autoOrbit);
     panels.showToast(state.autoOrbit ? '自动环游已开启，拖动即可暂停' : '自动环游已暂停');
   }
@@ -327,6 +327,8 @@ function boot() {
   });
   hotspots.setMode(state.cutaway ? 'interior' : 'exterior');
   setCarUI('parked');
+  controls.autoRotate = state.autoOrbit;
+  controls.autoRotateSpeed = 0.55;
 
   controls.addEventListener('start', () => {
     if (state.autoOrbit) {
@@ -456,6 +458,7 @@ function boot() {
   controlsUI.setActiveView(state.view);
   syncURL(state);
 }
+
 
 
 

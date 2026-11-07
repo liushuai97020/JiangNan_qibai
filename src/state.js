@@ -276,7 +276,7 @@ export function getInitialState() {
     cutaway: cutaway === '1' ? true : cutaway === '0' ? false : false,
     petals: petals === '0' ? false : true,
     wind: Number.isFinite(wind) ? Math.min(1, Math.max(0, wind)) : 0.55,
-    autoOrbit: false,
+    autoOrbit: true,
     panel: null,
     snapshot: params.get('snapshot') === '1'
   };

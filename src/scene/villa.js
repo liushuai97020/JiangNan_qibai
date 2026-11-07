@@ -55,17 +55,21 @@ function createPictureWindow(M, width, height) {
 
 function createGableEnd(M, zEaveFront, zEaveBack, eaveY, ridgeY, x, direction) {
   const shape = new THREE.Shape();
-  shape.moveTo(zEaveBack, eaveY);
-  shape.lineTo(zEaveFront, eaveY);
-  shape.lineTo((zEaveFront + zEaveBack) / 2, ridgeY);
+  if (direction === 'right') {
+    shape.moveTo(-zEaveFront, eaveY);
+    shape.lineTo(-zEaveBack, eaveY);
+    shape.lineTo(-(zEaveFront + zEaveBack) / 2, ridgeY);
+  } else {
+    shape.moveTo(zEaveBack, eaveY);
+    shape.lineTo(zEaveFront, eaveY);
+    shape.lineTo((zEaveFront + zEaveBack) / 2, ridgeY);
+  }
   shape.closePath();
   const geometry = new THREE.ShapeGeometry(shape);
-  const material = M.wall.clone();
-  material.side = THREE.DoubleSide;
-  material.transparent = true;
-  material.opacity = 1;
+  const material = M.wall;
   const mesh = new THREE.Mesh(geometry, material);
-  mesh.rotation.y = direction === 'right' ? -Math.PI / 2 : Math.PI / 2;
+  mesh.name = direction === 'right' ? 'gable-right' : 'gable-left';
+  mesh.rotation.y = direction === 'right' ? Math.PI / 2 : -Math.PI / 2;
   mesh.position.x = x;
   mesh.castShadow = true;
   mesh.receiveShadow = true;
@@ -394,4 +398,5 @@ export function createVilla(M) {
     }
   };
 }
+
 
